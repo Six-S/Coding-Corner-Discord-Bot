@@ -1,0 +1,14 @@
+{
+    "users":{
+        "0": {
+            "user": "username",
+            "raiting": 0,
+            "callMe": ""
+        }
+
+    },
+    "config":{
+        "token": "example token",
+        "totalRegistered": 0
+    }
+}
