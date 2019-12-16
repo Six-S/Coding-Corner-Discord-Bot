@@ -2,7 +2,7 @@
     "users":{
         "0": {
             "user": "username",
-            "raiting": 0,
+            "rating": 0,
             "callMe": ""
         }
 
