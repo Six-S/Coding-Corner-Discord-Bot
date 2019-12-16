@@ -5,15 +5,16 @@ This is a small project that makes use of [Rapptz's Discord API Wrapper](https:/
 
 The current iteration of this bot features a community driven reputation system. Users can allocate points to one another for good deeds, helpful advice, etc.
 
-###Notes:
+### Notes:
 
 Usage: $[Command]
+
 Command List:
-    $ping - Make sure CodeBot is around
-    $list - Show this list
-    $register - Register yourself with CodeBot
-    $addrep [user] - Give another user a reputation point
-    $showrep [user] - Show the reputation of a user
+    * $ping - Make sure CodeBot is around
+    * $list - Show this list
+    * $register - Register yourself with CodeBot
+    * $addrep [user] - Give another user a reputation point
+    * $showrep [user] - Show the reputation of a user
 
 More to come!
 Feel free to take this and use it if you want.
