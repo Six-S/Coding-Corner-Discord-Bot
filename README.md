@@ -10,11 +10,11 @@ The current iteration of this bot features a community driven reputation system.
 Usage: $[Command]
 
 Command List:
-    * $ping - Make sure CodeBot is around
-    * $list - Show this list
-    * $register - Register yourself with CodeBot
-    * $addrep [user] - Give another user a reputation point
-    * $showrep [user] - Show the reputation of a user
+    1. $ping - Make sure CodeBot is around
+    2. $list - Show this list
+    3. $register - Register yourself with CodeBot
+    4. $addrep [user] - Give another user a reputation point
+    5. $showrep [user] - Show the reputation of a user
 
 More to come!
 Feel free to take this and use it if you want.
