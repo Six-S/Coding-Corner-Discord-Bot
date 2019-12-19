@@ -34,7 +34,7 @@ if __name__ in '__main__':
     #If we fail, let's just put the error into our file so that our bot (or rather, our users) "know" about it.
     try:
         mail = imaplib.IMAP4_SSL('imap.gmail.com')
-        mail.login('example@example.com', 'example')
+        mail.login('example@example.com', 'examplepassword')
         mail.list()
         # Out: list of "folders" aka labels in gmail.
         # connect to inbox here.
@@ -50,7 +50,7 @@ if __name__ in '__main__':
         result, data = mail.fetch(latest_email_id, "(RFC822)") # fetch the email body (RFC822) for the given ID
 
         # here's the body, which is raw text of the whole email.
-        # NOTE: In Python3, make sure to decond the raw email like so.
+        # NOTE: In Python3, make sure to decode the raw email like so.
         raw_email = data[0][1].decode('utf-8')
 
         email_message = email.message_from_string(raw_email)
@@ -64,8 +64,10 @@ if __name__ in '__main__':
         body = get_first_text_block(email_message)
         save_to_file(body)
     #if we did encounter an error, let's save that to the file here.
+    #to avoid other emails getting through, we explicitly check for the "error" variable to be set.
     elif error:
         save_to_file(email_message)
+    #handle any other weird state we could possibly find ourselves in.
     else:
         save_to_file('An Unknown error occured, failed to fetch latest coding challenge.')
 
