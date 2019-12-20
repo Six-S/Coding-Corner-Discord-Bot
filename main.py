@@ -5,8 +5,6 @@ import json
 #     from yaml import CLoader as Loader, CDumper as Dumper
 # except ImportError:
 #     from yaml import Loader, Dumper
-
-
 class Bot():
     def __init__(self):
         print('[INFO] Spinning up Bot core functionality...')
@@ -14,10 +12,6 @@ class Bot():
 
         #these values won't change, so we can assign variables to them.
         self.token = self.settings['config']['token']
-    
-    def updateLocalSettings(self):
-        with open('settings.json') as settings:
-            self.settings = json.load(settings)
     
     def register(self, requester):
         #define a list of our current users
@@ -66,6 +60,14 @@ class Bot():
             'arg1': requester
         }
     
+    def getChallenge(self, user):
+        with open('challenge.txt', 'r') as challenge:
+            body = challenge.read()
+            challenge_body = body.split('-')[0].replace('=', '')
+            return {
+                'message': challenge_body
+            }
+
     def addReputation(self, userToAdd):
 
         #define a list of our current users
@@ -142,6 +144,7 @@ Usage: $[Command]
 Command List:
     $ping - Make sure CodeBot is around
     $list - Show this list
+    $challenge - Get the coding challenge of the day
     $register - Register yourself with CodeBot
     $addrep [user] - Give another user a reputation point
     $showrep [user] - Show the reputation of a user
@@ -154,6 +157,10 @@ Command List:
         }
 
     #### --------------- UTILITY FUNCTIONS --------------- ####
+
+    def updateLocalSettings(self):
+        with open('settings.json') as settings:
+            self.settings = json.load(settings)
 
     #Utility function to test for empty variables
     def empty(self, value):
@@ -181,6 +188,7 @@ if __name__ in '__main__':
         legal_actions = {
             '$ping': bot.pong,
             '$list': bot.fetchList,
+            '$challenge': bot.getChallenge,
             '$register': bot.register,
             '$addrep': bot.addReputation,
             '$showrep': bot.fetchReputation,
