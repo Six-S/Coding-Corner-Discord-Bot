@@ -1,3 +1,7 @@
+#CodeBot v0.5
+#written by: Six-S 
+#https://github.com/Six-S/Coding-Corner-Discord-Bot
+
 import discord
 import json
 #Maybe we'll use YAML instead.
@@ -9,6 +13,7 @@ class Bot():
     def __init__(self):
         print('[INFO] Spinning up Bot core functionality...')
         self.updateLocalSettings()
+        self.all_users = []
 
         #these values won't change, so we can assign variables to them.
         self.token = self.settings['config']['token']
@@ -17,47 +22,32 @@ class Bot():
         #define a list of our current users
         users = self.settings['users']
         
-        #Let's make sure the user doesn't already exist.
-        #NOTE: This brute force approach is fine for now, but
-        #is super awful for bigger userbases. FIXME ASAP...
-        for user in users:
-            if requester == users[user]['user']:
-                print('[WARN] Cannot register user "{0}" as they are already registered.'.format(requester))
-                return {
-                    'message': "Something went wrong registering you, @&arg1&... are you already registered?",
-                    'arg1': requester
-                }
-            #since we're already looping all of our users, lets get the last one
-            #so that we can create our new user.
-            newUserKey = int(user)
+        results = self.searchUsers(requester)
+        if self.empty(results['key']):
+            print('[WARN] Cannot register user "{0}" as they are already registered.'.format(requester))
+            return {
+                'message': "Something went wrong registering you, &arg1&... are you already registered?",
+                'arg1': self.getMention(requester)
+            }
         
         #since we don't currently have this user, let's build their profile!
         #NOTE: The way we get our new user key is shit. FIXME.
         newUser = {
-            str(newUserKey + 1): {
+            str(results['lastKey'] + 1): {
                 "user": requester,
-                "raiting": 0,
+                "rating": 0,
                 "callMe": ""
             }
         }
         users.update(newUser)
 
-        #Two "with" statements feels cleaner than seeking and writing
-        #Load our current settings in, and update with our new information.
-        #TODO: WE CAN PUT THIS INTO A FUNCTION!!!
-        with open('settings.json', 'r') as settings:
-            current_settings = json.load(settings)
-            current_settings['users'] = users
+        self.updateUserSettings(users)
 
-        #Write the new users to our settings.
-        with open('settings.json', 'w') as settings:
-            settings.write(json.dumps(current_settings))
-        
         #set our updated settings to our class level settings variable and return.
         self.updateLocalSettings()
         return {
-            'message': "You've been successfully registered, @&arg1&",
-            'arg1': requester
+            'message': "You've been successfully registered, &arg1&",
+            'arg1': self.getMention(requester)
         }
     
     def getChallenge(self, user):
@@ -73,68 +63,81 @@ class Bot():
         #define a list of our current users
         users = self.settings['users']
         foundUser = {}
+
+        foundUser = self.searchUsers(userToAdd)
         
-        #Let's make sure the user doesn't already exist.
-        #NOTE: This brute force approach is fine for now, but
-        #is super awful for bigger userbases. FIXME ASAP...
-        for user in users:
-            if userToAdd == users[user]['user']:
-                foundUser = users[user]
-                foundUserkey = user
+        if self.empty(foundUser['key']):
+            updated_value = {'rating': users[foundUser['key']]['rating'] + 1}
+            users[foundUser['key']].update(updated_value)
 
-        
-        if foundUser:
-            updated_value = {'rating': users[foundUserkey]['rating'] + 1}
-            users[foundUserkey].update(updated_value)
+            self.updateUserSettings(users)
 
-            #Two "with" statements feels cleaner than seeking and writing
-            #Load our current settings in, and update with our new information.
-            with open('settings.json', 'r') as settings:
-                current_settings = json.load(settings)
-                current_settings['users'] = users
-
-            #Write the new users to our settings.
-            with open('settings.json', 'w') as settings:
-                settings.write(json.dumps(current_settings))
-            
             #set our updated settings to our class level settings variable and return.
             self.updateLocalSettings()
             return {
-                'message': "You've given a reputation point to @&arg1&!",
-                'arg1': userToAdd
+                'message': "You've given a reputation point to &arg1&!",
+                'arg1': self.getMention(userToAdd)
             }
         else:
             print('[WARN] Cannot modify user "{0}" as they are not yet registered.'.format(userToAdd))
             return {
-                'message': "Something went wrong giving a reputation point to @&arg1&. Are they registered?",
-                'arg1': userToAdd
+                'message': "Something went wrong giving a reputation point to &arg1&. Are they registered?",
+                'arg1': self.getMention(userToAdd)
+            }
+
+    def removeReputation(self, userToRemove):
+
+        #define a list of our current users
+        users = self.settings['users']
+        foundUser = {}
+
+        foundUser = self.searchUsers(userToRemove)
+
+        if self.empty(foundUser['key']):
+            rating = users[foundUser['key']]['rating']
+            if rating >= 0:
+                updated_value = {'rating': rating - 1}
+                users[foundUser['key']].update(updated_value)
+            else:
+                return {
+                    'message': "&arg1&s reputation can't go any lower!",
+                    'arg1': self.getMention(userToRemove)
+                }
+
+            self.updateUserSettings(users)
+            
+            #set our updated settings to our class level settings variable and return.
+            self.updateLocalSettings()
+            return {
+                'message': "You've removed a reputation point from &arg1&!",
+                'arg1': self.getMention(userToRemove)
+            }
+        else:
+            print('[WARN] Cannot modify user "{0}" as they are not yet registered.'.format(userToRemove))
+            return {
+                'message': "Something went wrong removing a reputation point from &arg1&. Are they registered?",
+                'arg1': self.getMention(userToRemove)
             }
 
     #### --------------- REPLIES WITH NO LOGIC --------------- ####
     
     def fetchReputation(self, userToFetch):
-
         users = self.settings['users']
 
-        #Let's make sure the user doesn't already exist.
-        #NOTE: This brute force approach is fine for now, but
-        #is super awful for bigger userbases. FIXME ASAP...
-        for user in users:
-            if userToFetch == users[user]['user']:
-                foundUserkey = user
+        foundUserkey = self.searchUsers(userToFetch)['key']
 
-        points = self.settings['users'][foundUserkey]['rating']
+        points = users[foundUserkey]['rating']
 
         return {
-            'message': '@&arg1& currently has &arg2& points!',
-            'arg1': userToFetch,
+            'message': '&arg1& currently has &arg2& points!',
+            'arg1': self.getMention(userToFetch),
             'arg2': str(points)
         }
 
     def pong(self, user):
         return {
-            'message': 'Hello @&arg1&, this is CodeBot; Version 0.1!',
-            'arg1': user
+            'message': 'Hello &arg1&, this is CodeBot; Version 0.5!',
+            'arg1': self.getMention(user)
         }
 
     def fetchList(self, user):
@@ -147,8 +150,10 @@ Command List:
     $challenge - Get the coding challenge of the day
     $register - Register yourself with CodeBot
     $addrep [user] - Give another user a reputation point
+    $removerep [user] - Remove a reputation point from another user
     $showrep [user] - Show the reputation of a user
-    $codebotdev - Read my source code, or report a bug
+    $codebotdev - Learn more about CodeBots development
+    $bug - Report a bug you found in CodeBot
         '''}
 
     def devInfo(self, user):
@@ -156,8 +161,46 @@ Command List:
             'message': 'I am currently in development! To report a bug or learn more visit: https://github.com/Six-S/Coding-Corner-Discord-Bot'
         }
 
+    def reportBug(self, user):
+        return {
+            'message': 'Found a bug? Report it here: https://github.com/Six-S/Coding-Corner-Discord-Bot/issues'
+        }
+
     #### --------------- UTILITY FUNCTIONS --------------- ####
 
+    def getMention(self, userToSearch):
+        for user in self.all_users:
+            if userToSearch in user.name:
+                return user.mention
+
+    def searchUsers(self, userToSearch):
+        users = self.settings['users']
+
+        #Let's make sure the user doesn't already exist.
+        #NOTE: This brute force approach is fine for now, but
+        #is super awful for bigger userbases. FIXME ASAP...
+        for user in users:
+            if userToSearch == users[user]['user']:
+                return { 'key': user, 'user': users[user] }
+
+            #There's no really "good" way to get the last index of a dict.
+            #Just snag it here.
+            lastUser = int(user)
+
+        return { 'key': '', 'user': {}, 'lastKey': lastUser }
+
+    def updateUserSettings(self, users):
+        #Two "with" statements feels cleaner than seeking and writing
+        #Load our current settings in, and update with our new information.
+        with open('settings.json', 'r') as settings:
+            current_settings = json.load(settings)
+            current_settings['users'] = users
+
+        #Write the new users to our settings.
+        with open('settings.json', 'w') as settings:
+            settings.write(json.dumps(current_settings))
+
+    #Could probably do this better.
     def updateLocalSettings(self):
         with open('settings.json') as settings:
             self.settings = json.load(settings)
@@ -178,10 +221,10 @@ if __name__ in '__main__':
     @client.event
     async def on_ready():
         print('We have logged in as {0.user}'.format(client))
+        bot.all_users = client.users
 
     @client.event
     async def on_message(message):
-        print ('Message: ', message)
         if message.author == client.user:
             return
 
@@ -191,13 +234,13 @@ if __name__ in '__main__':
             '$challenge': bot.getChallenge,
             '$register': bot.register,
             '$addrep': bot.addReputation,
+            '$removerep': bot.removeReputation,
             '$showrep': bot.fetchReputation,
             '$codebotdev': bot.devInfo,
-            '$bug': bot.devInfo
+            '$bug': bot.reportBug
         }
 
         for action in legal_actions:
-            print (action)
             if message.content.startswith(action):
                 #try and get an argument out of the message if there is one.
                 try:
@@ -224,58 +267,10 @@ if __name__ in '__main__':
                     except KeyError:
                         pass
 
-                    print(full_response)
                     await message.channel.send(full_response)
 
                     return
                 # else:
                 #     await message.channel.send('You cant perform that action on yourself, @{0}'.format(message.author.name))
-
-
-        # if message.content.startswith('$ping'):
-        #     await message.channel.send('Hello, this is CodeBot; Version 0.1!')
-        # elif message.content.startswith('$list'):
-        #     await message.channel.send('''
-        #             Usage: $[Command]
-        #         Command List:
-        #             $ping - Make sure CodeBot is around
-        #             $list - Show this list
-        #             $register - Register yourself with CodeBot
-        #             $addrep [user] - Give another user a reputation point
-        #             $showrep [user] - Show the reputation of a user
-        #     ''')
-        # elif message.content.startswith('$register'):
-        #     print(message.author.name)
-        #     successful = bot.register(message.author.name)
-        #     if successful:
-        #         await message.channel.send("You've been successfully registered, @{0}".format(message.author.name))
-        #     else:
-        #         await message.channel.send('Something went wrong registering you, @{0}... are you already registered?'.format(message.author.name))
-        # elif message.content.startswith('$addrep'):
-        #     missingUser = False
-
-        #     try:
-        #         user = message.content.split(' ')[1]
-        #     except IndexError:
-        #         missingUser = True
-
-        #     if not missingUser:
-        #         successful = bot.addReputation(user)
-        #         if successful:
-        #             await message.channel.send("You've added a reputation point to @{0}s profile!".format(user))
-        #         else:
-        #             await message.channel.send('Something went wrong giving a reputation point to @{0}. Are they registered?'.format(user))
-        #     else:
-        #             await message.channel.send("Make sure you include the user you'd like to give a reputation point to, @{0}.".format(message.author.name))
-
-        # elif message.content.startswith('$showrep'):
-        #     try:
-        #         user = message.content.split(' ')[1]
-        #     except IndexError:
-        #         user = message.author.name
-            
-        #     print(user)
-
-        #     await message.channel.send("@{0} currently has {1} points!".format(user, bot.fetchReputation(user)))
 
     client.run(bot.token)
