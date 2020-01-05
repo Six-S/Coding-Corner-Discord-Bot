@@ -30,7 +30,7 @@ Feel like this bot is missing a feature? [Submit a feature request!](https://git
 ### Setup:
 CodeBot was written to run in a Linux environment, but with some small changes could be altered to run elsewhere.
 
-## Without Docker
+#### Without Docker
 If you don't want to use Docker, then setup is as simple as:
 `python3 -m pip install -U discord.py`
 then
@@ -40,10 +40,10 @@ Having trouble? Your answer is probably [here](https://discordpy.readthedocs.io/
 
 What you do with the emailWorker.py script it up to you - though, it would be easiest to just add it as a cron job.
 
-## With Docker
-Once you have the directory, you should just need to run the following commands:
+#### With Docker
 From inside the Coding-Corner-Discord-Bot directory, run:
 `sudo docker build -t code-bot  .`
+
 `sudo docker run --rm --name code-bot code-bot`
 
 When running the container, you do not have to name it, and it does not need the --rm flag.
