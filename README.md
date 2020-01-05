@@ -28,12 +28,23 @@ Feel free to take this and use it if you want.
 Feel like this bot is missing a feature? [Submit a feature request!](https://github.com/Six-S/Coding-Corner-Discord-Bot/issues) Just make sure you label is properly!
 
 ### Setup:
-CodeBot can be run with or without Docker.
+CodeBot was written to run in a Linux environment, but with some small changes could be altered to run elsewhere.
 
+## Without Docker
 If you don't want to use Docker, then setup is as simple as:
 `python3 -m pip install -U discord.py`
+then
+`python3 main.py`
 
 Having trouble? Your answer is probably [here](https://discordpy.readthedocs.io/en/latest/intro.html#installing), courtesy of Rapptz.
 
-Docker instructions will be here once I actually implement Docker lol.
+What you do with the emailWorker.py script it up to you - though, it would be easiest to just add it as a cron job.
 
+## With Docker
+Once you have the directory, you should just need to run the following commands:
+From inside the Coding-Corner-Discord-Bot directory, run:
+`sudo docker build -t code-bot  .`
+`sudo docker run --rm --name code-bot code-bot`
+
+When running the container, you do not have to name it, and it does not need the --rm flag.
+The name is for ease of use, and the --rm is much more useful for debugging it. Once it works how you'd like, it may be of more benifit to remove the `--rm` flag.
