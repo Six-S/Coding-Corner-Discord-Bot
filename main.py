@@ -275,15 +275,16 @@ if __name__ in '__main__':
             await message.channel.send('{0} - To run a command on yourself, run it without an argument.'.format(message.author.mention))
             return False
 
-        #top level check to make sure the person didn't try to tag the user they're performing an action on.
-        #NOTE: I'm not sure if this is right or not. Without this, there will be two mentions per command which seems annoying/excessive.
-        #additionally, some small stuff will need to be modified to work with mentions. 
-        if '@' in message.content:
-            await message.channel.send('{0} - Please avoid tagging the user you are trying to perform this action on.'.format(message.author.mention))
-            return False
-
         for action in legal_actions:
             if message.content.startswith(action):
+
+                #top level check to make sure the person didn't try to tag the user they're performing an action on.
+                #NOTE: This is hacky. Without this, there will be two mentions per command which seems annoying/excessive.
+                #additionally, some small stuff will need to be modified to work with mentions. 
+                if '@' in message.content:
+                    await message.channel.send('{0} - Please avoid tagging the user you are trying to perform this action on.'.format(message.author.mention))
+                    return False
+
                 #try and get an argument out of the message if there is one.
                 try:
                     user = message.content.split(' ')[1]
