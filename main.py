@@ -55,7 +55,7 @@ class Bot():
 
     #function that returns the coding challenge of the day.
     def getChallenge(self, user):
-        with open('challenge.txt', 'r') as challenge:
+        with open('/root/challenge.txt', 'r') as challenge:
             body = challenge.read()
             #When pulling from the email, we get all of these "=", so handle those while we pull the body out.
             #NOTE: The formatting of the body could use some work, it's sorta all over the place when it comes out.
