@@ -57,10 +57,11 @@ class Bot():
     def getChallenge(self, user):
         with open('/root/challenge.txt', 'r') as challenge:
             body = challenge.read()
+            #Ugh.
             #When pulling from the email, we get all of these "=", so handle those while we pull the body out.
             #NOTE: The formatting of the body could use some work, it's sorta all over the place when it comes out.
             #Can probably handle that in v2 of the email worker, but either way.
-            challenge_body = body.split('-')[0].replace('=', '')
+            challenge_body = body.split('---')[0].replace('=', '')
             return { 'message': challenge_body }
 
     #Function that adds reputation to a specific user.
