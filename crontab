@@ -1,4 +1,4 @@
-0,30 * * * * echo "[INFO] Cron is healthy" >> /var/log/cron.log 2>&1
+0 0 * * * echo "[INFO] Cron is healthy" >> /var/log/cron.log 2>&1
 0 18 * * * bash -c "/usr/bin/python3 /emailWorker.py >> /var/log/cron.log 2>&1"
 # Don't remove the empty line at the end of this file. It is required to run the cron job
 
